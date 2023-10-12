@@ -19,7 +19,18 @@ jobs:
         uses: snyk/actions/node@master
         continue-on-error: true
         with:
-          args: --all-projects --org=$SNYK_ORG_ID
+          args: --all-projects --org=$SNYK_ORG_ID --json-file-output=oss-results.json
+      - 
+        uses: actions/setup-node@v3
+      -
+        run: npm install -g snyk-to-html
+      -
+        run: cat oss-results.json | snyk-to-html > oss-results.html        
+      - 
+        uses: actions/upload-artifact@v3
+        with:
+          name: oss-results
+          path: oss-results.html
   
   code-assessment:
     needs: oss-assessment
