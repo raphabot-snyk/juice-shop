@@ -1,0 +1,91 @@
+name: On Pull Request
+run-name: PR #${{ github.event.number }}
+on: [pull_request, workflow_dispatch]
+
+env:
+  SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+  SNYK_ORG_ID: ${{ secrets.SNYK_ORG_ID }}
+
+jobs:
+  oss-assessment:
+    permissions: write-all
+    name: Open Source Assessment
+    runs-on: ubuntu-latest
+    steps:
+      - 
+        uses: actions/checkout@v3
+      - 
+        name: Run Snyk to check for Open Source vulnerabilities
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        with:
+          args: --all-projects --org=$SNYK_ORG_ID
+  
+  code-assessment:
+    needs: oss-assessment
+    permissions: write-all
+    name: SAST Assessment
+    runs-on: ubuntu-latest
+    steps:
+      - 
+        uses: actions/checkout@v3
+      -
+        uses: snyk/actions/setup@master
+      - 
+        name: Run Snyk to check for Static Application Security Testing Findings
+        continue-on-error: true
+        run: snyk code test --org=$SNYK_ORG_ID
+      
+  container-assessment:
+    needs: code-assessment
+    permissions: write-all
+    name: Container Assessment
+    runs-on: ubuntu-latest
+    steps:
+    - 
+      uses: actions/checkout@v3
+    - 
+      name: Build the container image
+      run: docker build -t raphabot/juice-shop:test .
+    - 
+      name: Run Snyk to check container image for vulnerabilities
+      # continue-on-error: true # To make sure that SARIF upload gets called
+      uses: snyk/actions/docker@master
+      with:
+        image: raphabot/juice-shop:test
+        args: --severity-threshold=high --file=src/Dockerfile --org=$SNYK_ORG_ID
+ 
+  kubernetes-artifact-assessment:
+    needs: container-assessment
+    permissions: write-all
+    name: Kubernetes Artifact Assessment
+    runs-on: ubuntu-latest
+    steps:
+      - 
+        uses: actions/checkout@v3
+      
+      - 
+        name: Run Snyk to check Kubernetes Artificat misconfigurations
+        continue-on-error: true # To make sure that SARIF upload gets called
+        uses: snyk/actions/iac@master 
+        with:
+          args: ./k8s-src --org=$SNYK_ORG_ID
+  
+  terraform-assessment:
+    needs: kubernetes-artifact-assessment
+    permissions: write-all
+    name: Terraform Assessment
+    runs-on: ubuntu-latest
+    steps:
+      - 
+        uses: actions/checkout@v3
+      - 
+        uses: hashicorp/setup-terraform@v2
+      - 
+        run: terraform init
+      - 
+        name: Run Snyk to check AWS misconfigurations in Terraform IaC
+        continue-on-error: true # To make sure that SARIF upload gets called
+        uses: snyk/actions/iac@master 
+        with:
+          args: --org=$SNYK_ORG_ID
