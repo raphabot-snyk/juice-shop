@@ -45,7 +45,18 @@ jobs:
       - 
         name: Run Snyk to check for Static Application Security Testing Findings
         continue-on-error: true
-        run: snyk code test --org=$SNYK_ORG_ID
+        run: snyk code test --org=$SNYK_ORG_ID -json-file-output=code-results.json
+      - 
+        uses: actions/setup-node@v3
+      -
+        run: npm install -g snyk-to-html
+      -
+        run: cat code-results.json | snyk-to-html > code-results.html        
+      - 
+        uses: actions/upload-artifact@v3
+        with:
+          name: code-results
+          path: code-results.html
       
   container-assessment:
     needs: code-assessment
@@ -64,7 +75,18 @@ jobs:
       uses: snyk/actions/docker@master
       with:
         image: raphabot/juice-shop:test
-        args: --file=Dockerfile --org=$SNYK_ORG_ID
+        args: --file=Dockerfile --org=$SNYK_ORG_ID --json-file-output=container-results.json
+      - 
+        uses: actions/setup-node@v3
+      -
+        run: npm install -g snyk-to-html
+      -
+        run: cat container-results.json | snyk-to-html > container-results.html        
+      - 
+        uses: actions/upload-artifact@v3
+        with:
+          name: container-results
+          path: container-results.html
  
   kubernetes-artifact-assessment:
     needs: container-assessment
@@ -80,7 +102,18 @@ jobs:
         continue-on-error: true
         uses: snyk/actions/iac@master 
         with:
-          args: ./k8s-src --org=$SNYK_ORG_ID
+          args: ./k8s-src --org=$SNYK_ORG_ID --json-file-output=k8s-results.json
+      - 
+        uses: actions/setup-node@v3
+      -
+        run: npm install -g snyk-to-html
+      -
+        run: cat k8s-results.json | snyk-to-html > k8s-results.html        
+      - 
+        uses: actions/upload-artifact@v3
+        with:
+          name: k8s-results
+          path: k8s-results.html
   
   terraform-assessment:
     needs: kubernetes-artifact-assessment
@@ -96,7 +129,18 @@ jobs:
         run: terraform init
       - 
         name: Run Snyk to check AWS misconfigurations in Terraform IaC
-        continue-on-error: true # To make sure that SARIF upload gets called
+        continue-on-error: true
         uses: snyk/actions/iac@master 
         with:
-          args: --org=$SNYK_ORG_ID
+          args: --org=$SNYK_ORG_ID --json-file-output=terraform-results.json
+      - 
+        uses: actions/setup-node@v3
+      -
+        run: npm install -g snyk-to-html
+      -
+        run: cat terraform-results.json | snyk-to-html > terraform-results.html        
+      - 
+        uses: actions/upload-artifact@v3
+        with:
+          name: terraform-results
+          path: terraform-results.html
