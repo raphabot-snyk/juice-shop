@@ -64,18 +64,18 @@ jobs:
     name: Container Assessment
     runs-on: ubuntu-latest
     steps:
-    - 
-      uses: actions/checkout@v3
-    - 
-      name: Build the container image
-      run: docker build -t raphabot/juice-shop:test .
-    - 
-      name: Run Snyk to check container image for vulnerabilities
-      continue-on-error: true
-      uses: snyk/actions/docker@master
-      with:
-        image: raphabot/juice-shop:test
-        args: --file=Dockerfile --org=$SNYK_ORG_ID --json-file-output=container-results.json
+      - 
+        uses: actions/checkout@v3
+      - 
+        name: Build the container image
+        run: docker build -t raphabot/juice-shop:test .
+      - 
+        name: Run Snyk to check container image for vulnerabilities
+        continue-on-error: true
+        uses: snyk/actions/docker@master
+        with:
+          image: raphabot/juice-shop:test
+          args: --file=Dockerfile --org=$SNYK_ORG_ID --json-file-output=container-results.json
       - 
         uses: actions/setup-node@v3
       -
