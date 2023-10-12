@@ -53,7 +53,7 @@ jobs:
       uses: snyk/actions/docker@master
       with:
         image: raphabot/juice-shop:test
-        args: --severity-threshold=high --file=src/Dockerfile --org=$SNYK_ORG_ID
+        args: --file=Dockerfile --org=$SNYK_ORG_ID
  
   kubernetes-artifact-assessment:
     needs: container-assessment
