@@ -65,3 +65,4 @@ module.exports = function getUserProfile () {
     return utils.extractFilename(config.get('application.favicon'))
   }
 }
+
