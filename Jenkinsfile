@@ -1,9 +1,9 @@
 pipeline {
   agent any
   stages {
-    stage('') {
+    stage('error') {
       steps {
-        snykSecurity(failOnError: true, organisation: 'raphabot-snyk')
+        snykSecurity(failOnError: true, organisation: 'raphabot-snyk', snykInstallation: 'snyk-latest', additionalArguments: 'test', snykTokenId: 'raphabot-snyk-token')
       }
     }
 
