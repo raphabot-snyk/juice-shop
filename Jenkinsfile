@@ -1,9 +1,9 @@
 pipeline {
   agent any
   stages {
-    stage('error') {
+    stage('Open Source Scan') {
       steps {
-        snykSecurity(failOnError: true, organisation: 'raphabot-snyk', snykInstallation: 'snyk-latest', additionalArguments: 'test', snykTokenId: 'raphabot-snyk-token')
+        snykSecurity(snykInstallation: 'snyk-latest', organisation: 'raphabot-snyk', additionalArguments: 'test', snykTokenId: 'raphabot-snyk-token')
       }
     }
 
