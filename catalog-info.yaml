@@ -5,9 +5,7 @@ metadata:
   description: The best juice shop in the world.
   labels:
     example.com/custom: custom_label_value
-  annotations:
-    example.com/service-discovery: artistweb
-    circleci.com/project-slug: github/example-org/artist-website
+  title: Juice Shop
   tags:
     - javascript
     - nodejs
