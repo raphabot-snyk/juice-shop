@@ -1,0 +1,25 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: juice-shop
+  description: The best juice shop in the world.
+  labels:
+    example.com/custom: custom_label_value
+  annotations:
+    example.com/service-discovery: artistweb
+    circleci.com/project-slug: github/example-org/artist-website
+  tags:
+    - javascript
+    - nodejs
+    - web
+    - juice
+  links:
+    - url: https://juiceshop.raphabot.com/
+      title: Juice Shop
+      icon: Blender
+      type: website
+spec:
+  type: website
+  lifecycle: production
+  owner: juice-shop-team
+  system: public-websites
