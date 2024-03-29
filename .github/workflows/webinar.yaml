@@ -16,8 +16,34 @@ jobs:
       - 
         run: echo "Unit Testing"
 
-  build-container-image:
+  code-assessment:
     needs: unit-testing
+    permissions: write-all
+    name: SAST Assessment
+    runs-on: ubuntu-latest
+    steps:
+      - 
+        uses: actions/checkout@v4
+      -
+        uses: snyk/actions/setup@master
+      - 
+        name: Run Snyk to check for Static Application Security Testing Findings
+        continue-on-error: true
+        run: snyk code test --org=$SNYK_ORG_ID -json-file-output=code-results.json
+      - 
+        uses: actions/setup-node@v4
+      -
+        run: npm install -g snyk-to-html
+      -
+        run: cat code-results.json | snyk-to-html > code-results.html        
+      - 
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-results
+          path: code-results.html
+
+  build-container-image:
+    needs: code-assessment
     permissions: write-all
     name: Build Container Image
     runs-on: ubuntu-latest
@@ -58,32 +84,6 @@ jobs:
   #       with:
   #         name: oss-results
   #         path: oss-results.html
-  
-  # code-assessment:
-  #   needs: oss-assessment
-  #   permissions: write-all
-  #   name: SAST Assessment
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - 
-  #       uses: actions/checkout@v4
-  #     -
-  #       uses: snyk/actions/setup@master
-  #     - 
-  #       name: Run Snyk to check for Static Application Security Testing Findings
-  #       continue-on-error: true
-  #       run: snyk code test --org=$SNYK_ORG_ID -json-file-output=code-results.json
-  #     - 
-  #       uses: actions/setup-node@v4
-  #     -
-  #       run: npm install -g snyk-to-html
-  #     -
-  #       run: cat code-results.json | snyk-to-html > code-results.html        
-  #     - 
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: code-results
-  #         path: code-results.html
       
   # container-assessment:
   #   needs: code-assessment
