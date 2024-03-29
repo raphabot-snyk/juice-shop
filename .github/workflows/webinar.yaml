@@ -17,6 +17,7 @@ jobs:
         run: echo "Unit Testing"
 
   build-container-image:
+    needs: unit-testing
     permissions: write-all
     name: Build Container Image
     runs-on: ubuntu-latest
@@ -25,6 +26,7 @@ jobs:
         run: echo "Build Container Image"
 
   deploy-to-prod:
+    needs: build-container-image
     permissions: write-all
     name: Deploy to Production
     runs-on: ubuntu-latest
