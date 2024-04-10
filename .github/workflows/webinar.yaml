@@ -69,7 +69,7 @@ jobs:
           path: oss-results.html
 
   build-container-image:
-    needs: [code-assessment, unit-testing]
+    needs: [code-assessment, oss-assessment]
     permissions: write-all
     name: Build Container Image
     runs-on: ubuntu-latest
