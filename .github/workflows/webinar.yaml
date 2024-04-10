@@ -42,6 +42,31 @@ jobs:
           name: code-results
           path: code-results.html
 
+  oss-assessment:
+    permissions: write-all
+    name: Open Source Assessment
+    runs-on: ubuntu-latest
+    steps:
+      - 
+        uses: actions/checkout@v4
+      - 
+        name: Run Snyk to check for Open Source vulnerabilities
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        with:
+          args: --all-projects --org=$SNYK_ORG_ID --json-file-output=oss-results.json
+      - 
+        uses: actions/setup-node@v4
+      -
+        run: npm install -g snyk-to-html
+      -
+        run: cat oss-results.json | snyk-to-html > oss-results.html        
+      - 
+        uses: actions/upload-artifact@v4
+        with:
+          name: oss-results
+          path: oss-results.html
+
   build-container-image:
     needs: code-assessment
     permissions: write-all
@@ -59,31 +84,6 @@ jobs:
     steps:
       - 
         run: echo "Deploy to Production"
-  
-  # oss-assessment:
-  #   permissions: write-all
-  #   name: Open Source Assessment
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - 
-  #       uses: actions/checkout@v4
-  #     - 
-  #       name: Run Snyk to check for Open Source vulnerabilities
-  #       uses: snyk/actions/node@master
-  #       continue-on-error: true
-  #       with:
-  #         args: --all-projects --org=$SNYK_ORG_ID --json-file-output=oss-results.json
-  #     - 
-  #       uses: actions/setup-node@v4
-  #     -
-  #       run: npm install -g snyk-to-html
-  #     -
-  #       run: cat oss-results.json | snyk-to-html > oss-results.html        
-  #     - 
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: oss-results
-  #         path: oss-results.html
       
   # container-assessment:
   #   needs: code-assessment
