@@ -43,6 +43,7 @@ jobs:
           path: code-results.html
 
   oss-assessment:
+    needs: code-assessment
     permissions: write-all
     name: Open Source Assessment
     runs-on: ubuntu-latest
