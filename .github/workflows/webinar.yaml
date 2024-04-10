@@ -77,6 +77,36 @@ jobs:
       - 
         run: echo "Build Container Image"
 
+  container-assessment:
+    needs: build-container-image
+    permissions: write-all
+    name: Container Assessment
+    runs-on: ubuntu-latest
+    steps:
+      - 
+        uses: actions/checkout@v4
+      - 
+        name: Build the container image
+        run: docker build -t raphabot/juice-shop:test .
+      - 
+        name: Run Snyk to check container image for vulnerabilities
+        continue-on-error: true
+        uses: snyk/actions/docker@master
+        with:
+          image: raphabot/juice-shop:test
+          args: --file=Dockerfile --org=$SNYK_ORG_ID --exclude-app-vulns --json-file-output=container-results.json
+      - 
+        uses: actions/setup-node@v4
+      -
+        run: npm install -g snyk-to-html
+      -
+        run: cat container-results.json | snyk-to-html > container-results.html        
+      - 
+        uses: actions/upload-artifact@v4
+        with:
+          name: container-results
+          path: container-results.html
+
   deploy-to-prod:
     needs: build-container-image
     permissions: write-all
@@ -85,36 +115,6 @@ jobs:
     steps:
       - 
         run: echo "Deploy to Production"
-      
-  # container-assessment:
-  #   needs: code-assessment
-  #   permissions: write-all
-  #   name: Container Assessment
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - 
-  #       uses: actions/checkout@v4
-  #     - 
-  #       name: Build the container image
-  #       run: docker build -t raphabot/juice-shop:test .
-  #     - 
-  #       name: Run Snyk to check container image for vulnerabilities
-  #       continue-on-error: true
-  #       uses: snyk/actions/docker@master
-  #       with:
-  #         image: raphabot/juice-shop:test
-  #         args: --file=Dockerfile --org=$SNYK_ORG_ID --json-file-output=container-results.json
-  #     - 
-  #       uses: actions/setup-node@v4
-  #     -
-  #       run: npm install -g snyk-to-html
-  #     -
-  #       run: cat container-results.json | snyk-to-html > container-results.html        
-  #     - 
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: container-results
-  #         path: container-results.html
  
   # kubernetes-artifact-assessment:
   #   needs: container-assessment
