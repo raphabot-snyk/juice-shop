@@ -107,41 +107,40 @@ jobs:
           name: container-results
           path: container-results.html
 
-  deploy-to-prod:
+  kubernetes-artifact-assessment:
     needs: container-assessment
+    permissions: write-all
+    name: Kubernetes Artifact Assessment
+    runs-on: ubuntu-latest
+    steps:
+      - 
+        uses: actions/checkout@v4
+      - 
+        name: Run Snyk to check Kubernetes Artificat misconfigurations
+        continue-on-error: true
+        uses: snyk/actions/iac@master 
+        with:
+          args: ./k8s-src --org=$SNYK_ORG_ID --json-file-output=k8s-results.json
+      - 
+        uses: actions/setup-node@v4
+      -
+        run: npm install -g snyk-to-html
+      -
+        run: cat k8s-results.json | snyk-to-html > k8s-results.html        
+      - 
+        uses: actions/upload-artifact@v4
+        with:
+          name: k8s-results
+          path: k8s-results.html
+
+  deploy-to-prod:
+    needs: kubernetes-artifact-assessment
     permissions: write-all
     name: Deploy to Production
     runs-on: ubuntu-latest
     steps:
       - 
         run: echo "Deploy to Production"
- 
-  # kubernetes-artifact-assessment:
-  #   needs: container-assessment
-  #   permissions: write-all
-  #   name: Kubernetes Artifact Assessment
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - 
-  #       uses: actions/checkout@v4
-      
-  #     - 
-  #       name: Run Snyk to check Kubernetes Artificat misconfigurations
-  #       continue-on-error: true
-  #       uses: snyk/actions/iac@master 
-  #       with:
-  #         args: ./k8s-src --org=$SNYK_ORG_ID --json-file-output=k8s-results.json
-  #     - 
-  #       uses: actions/setup-node@v4
-  #     -
-  #       run: npm install -g snyk-to-html
-  #     -
-  #       run: cat k8s-results.json | snyk-to-html > k8s-results.html        
-  #     - 
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: k8s-results
-  #         path: k8s-results.html
   
   # terraform-assessment:
   #   needs: kubernetes-artifact-assessment
