@@ -43,7 +43,7 @@ jobs:
           path: code-results.html
 
   oss-assessment:
-    needs: code-assessment
+    needs: unit-testing
     permissions: write-all
     name: Open Source Assessment
     runs-on: ubuntu-latest
@@ -69,7 +69,9 @@ jobs:
           path: oss-results.html
 
   build-container-image:
-    needs: code-assessment
+    needs: 
+      - code-assessment
+      - unit-testing
     permissions: write-all
     name: Build Container Image
     runs-on: ubuntu-latest
