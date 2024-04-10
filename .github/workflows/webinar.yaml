@@ -108,7 +108,7 @@ jobs:
           path: container-results.html
 
   deploy-to-prod:
-    needs: build-container-image
+    needs: container-assessment
     permissions: write-all
     name: Deploy to Production
     runs-on: ubuntu-latest
