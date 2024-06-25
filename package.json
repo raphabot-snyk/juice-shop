@@ -166,6 +166,7 @@
     "yaml-schema-validator": "^1.2.2",
     "z85": "^0.0.2",
     "tinymce": "4.1.0"
+    
   },
   
   "devDependencies": {
